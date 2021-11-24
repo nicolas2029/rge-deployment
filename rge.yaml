@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rge-deployment
+  labels:
+    app: rge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rge
+  template:
+    metadata:
+      labels:
+        app: rge
+    spec:
+      containers:
+      - name: rge
+        image: nicolas2029/restaurante-gorm-echo:alpine
+        ports:
+        - containerPort: 3000
+        env:
+        - name: RGE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-db-secret
+              key: postgres-root-password
+        - name: RGE_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-db-secret
+              key: postgres-root-user
+        - name: RGE_RSA
+          valueFrom:
+            secretKeyRef:
+              name: ssh-key-secret
+              key: ssh-privatekey
+        - name: RGE_RSA_PUB
+          valueFrom:
+            secretKeyRef:
+              name: ssh-key-secret
+              key: ssh-publickey
+        - name: RGE_NAME_DB
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-db-configmap
+              key: postgres-database
+        - name: RGE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-db-configmap
+              key: postgres-url
+        - name: RGE_MAIL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mail-secret
+              key: mail-password
+        - name: RGE_MAIL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mail-secret
+              key: mail-user
+        resources:
+          limits:
+            memory: "2G"
+            cpu: 2
+            hugepages-2Mi: "200Mi"
+          requests:
+            memory: "2G"
+            cpu: 2
+            hugepages-2Mi: "200Mi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rge-service
+spec:
+  selector:
+    app: rge
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+      nodePort: 30000
