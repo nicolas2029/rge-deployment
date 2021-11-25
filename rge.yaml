@@ -60,6 +60,11 @@ spec:
             secretKeyRef:
               name: mail-secret
               key: mail-user
+        - name: RGE_MAIL_CODE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: mail-configmap
+              key: rge-mail-code-host
         resources:
           limits:
             memory: "2G"
