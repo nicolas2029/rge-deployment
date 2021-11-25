@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: mail-configmap
 data:
-  rge-mail-code-host: localhost
+  rge-mail-code-host: localhost:30000
